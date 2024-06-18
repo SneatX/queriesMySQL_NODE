@@ -2,43 +2,98 @@
 
 1. Devuelve un listado con todos los pedidos que se han realizado. Los pedidos deben estar ordenados por la fecha de realización, mostrando en primer lugar los pedidos más recientes.
 
+   ```sql
+   SELECT * 
+   FROM pedido
+   ORDER BY fecha DESC;
+   ```
+
 2. Devuelve todos los datos de los dos pedidos de mayor valor.
 
    ```sql
    # Rojas
+   SELECT * 
+   FROM pedido
+   ORDER BY total DESC
+   LIMIT 2;
    ```
 
 3. Devuelve un listado con los identificadores de los clientes que han realizado algún pedido. Tenga en cuenta que no debe mostrar identificadores que estén repetidos.
 
+   ```sql
+   SELECT id_cliente 
+   FROM pedido
+   GROUP BY id_cliente;
+   ```
+
 4. Devuelve un listado de todos los pedidos que se realizaron durante el año 2017, cuya cantidad total sea superior a 500€.
+
+   ```sql
+   SELECT * 
+   FROM pedido
+   WHERE total > 500;
+   ```
 
 5. Devuelve un listado con el nombre y los apellidos de los comerciales que tienen una comisión entre 0.05 y 0.11.
 
    ```sql
    # Samuel
+   SELECT *
+   FROM comercial
+   WHERE comision > 0.05 AND comision < 0.11;
    ```
 
 6. Devuelve el valor de la comisión de mayor valor que existe en la tabla `comercial`.
+
+   ```sql
+   SELECT * 
+   FROM comercial 
+   ORDER BY comision DESC
+   LIMIT 1;
+   ```
 
 7. Devuelve el identificador, nombre y primer apellido de aquellos clientes cuyo segundo apellido **no** es `NULL`. El listado deberá estar ordenado alfabéticamente por apellidos y nombre.
 
    ```sql
    # Eder
+   SELECT id, CONCAT(nombre,' ', apellido1) AS nombre_completo  
+   FROM cliente 
+   WHERE apellido2 IS NOT NULL 
+   ORDER BY 
+   nombre ASC,
+   apellido1 ASC, 
+   apellido2 ASC;
    ```
 
 8. Devuelve un listado de los nombres de los clientes que empiezan por `A` y terminan por `n` y también los nombres que empiezan por `P`. El listado deberá estar ordenado alfabéticamente.
 
    ```sql
    # Jaime Alexander
+   SELECT nombre 
+   FROM cliente
+   WHERE (nombre LIKE "a%" AND nombre LIKE "%n") OR nombre LIKE "p%"
+   ORDER BY 
+   nombre;
    ```
 
 9. Devuelve un listado de los nombres de los clientes que **no** empiezan por `A`. El listado deberá estar ordenado alfabéticamente.
 
    ```sql
    #Jhoan Barreto
+   SELECT nombre 
+   FROM cliente
+   WHERE nombre NOT LIKE "a%"
+   ORDER BY 
+   nombre;
    ```
 
 10. Devuelve un listado con los nombres de los comerciales que terminan por `el` o `o`. Tenga en cuenta que se deberán eliminar los nombres repetidos.
+
+    ```sql
+    SELECT DISTINCT nombre
+    FROM comercial
+    WHERE nombre LIKE "%el" OR NOMBRE LIKE "%o";
+    ```
 
 ### 2. Consultas multitabla (Composición interna)
 
@@ -46,10 +101,20 @@ Resuelva todas las consultas utilizando la sintaxis de `SQL1` y `SQL2`.
 
 1. Devuelve un listado con el identificador, nombre y los apellidos de todos los clientes que han realizado algún pedido. El listado debe estar ordenado alfabéticamente y se deben eliminar los elementos repetidos.
 
+   ```sql
+   SELECT DISTINCT c.id, c.nombre, CONCAT(c.apellido1," ", c.apellido2) AS apellidos
+   FROM pedido AS p
+   INNER JOIN cliente AS c ON p.id_cliente = c.id
+   ORDER BY c.nombre;
+   ```
+
 2. Devuelve un listado que muestre todos los pedidos que ha realizado cada cliente. El resultado debe mostrar todos los datos de los pedidos y del cliente. El listado debe mostrar los datos de los clientes ordenados alfabéticamente.
 
    ```sql
    # Saez
+   SELECT p.*, c.*
+   FROM pedido AS p
+   INNER JOIN cliente AS c ON p.id_cliente=c.id;
    ```
 
 3. Devuelve un listado que muestre todos los pedidos en los que ha participado un comercial. El resultado debe mostrar todos los datos de los pedidos y de los comerciales. El listado debe mostrar los datos de los comerciales ordenados alfabéticamente.
@@ -162,6 +227,10 @@ Resuelva todas las consultas utilizando las cláusulas `LEFT JOIN` y `RIGHT JOIN
 
     ```sql
     # Santiago Ospina
+    SELECT cliente.id, cliente.apellido1, cliente.apellido2, COUNT(pedido.id)
+    FROM cliente
+    LEFT JOIN pedido ON cliente.id=pedido.id_cliente
+    GROUP BY cliente.id;
     ```
 
 12. Devuelve un listado con el identificador de cliente, nombre y apellidos y el número total de pedidos que ha realizado cada uno de clientes **durante el año 2017**.
