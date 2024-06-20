@@ -219,17 +219,20 @@ Resuelva todas las consultas utilizando las cláusulas `LEFT JOIN` y `RIGHT JOIN
 5. Devuelve un listado con los clientes que no han realizado ningún pedido y de los comerciales que no han participado en ningún pedido. Ordene el listado alfabéticamente por los apellidos y el nombre. En en listado deberá diferenciar de algún modo los clientes y los comerciales.
 
    ```sql
-   SELECT cl.nombre, CONCAT(cl.apellido1, " ", cl.apellido2) AS apellido
+   SELECT 'Cliente' AS tipo, cl.nombre, CONCAT(cl.apellido1, " ", cl.apellido2) AS apellidos
    FROM cliente AS cl
    LEFT JOIN pedido AS p ON cl.id = p.id_cliente
    WHERE p.id IS NULL
    
    UNION 
    
-   SELECT co.nombre, CONCAT(co.apellido1, " ", co.apellido2)
+   SELECT 'Comercial' AS tipo, co.nombre, CONCAT(co.apellido1, " ", co.apellido2) AS apellidos
    FROM comercial AS co
    LEFT JOIN pedido AS p ON co.id = p.id_comercial
-   WHERE p.id IS NULL;
+   WHERE p.id IS NULL
+   
+   ORDER BY apellidos, nombre;
+   
    ```
 
    
