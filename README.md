@@ -121,29 +121,52 @@ Resuelva todas las consultas utilizando la sintaxis de `SQL1` y `SQL2`.
 
    ```sql
    # Kevin Galvis
+   SELECT p.id, p.total, p.fecha, c.id AS id_comercial, c.nombre, CONCAT(c.apellido1," ", c.apellido2) AS apellidos, c.comision
+   FROM pedido AS p
+   INNER JOIN comercial AS c ON p.id_comercial = c.id
+   ORDER BY c.nombre;
+   
    ```
 
 4. Devuelve un listado que muestre todos los clientes, con todos los pedidos que han realizado y con los datos de los comerciales asociados a cada pedido.
 
    ```sql
    # Gabriel
+   SELECT p.id, p.total, p.fecha, cl.nombre AS nombre_cliente, CONCAT(cl.apellido1, " ", cl.apellido2) AS apellidos_cliente, cl.categoria AS categoria_cliente, co.nombre AS nombre_comercial, CONCAT(co.apellido1, " ", co.apellido2) AS apellidos_comercial, co.comision
+   FROM pedido AS p
+   INNER JOIN cliente AS cl ON p.id_cliente = cl.id
+   INNER JOIN comercial AS co ON p.id_comercial = co.id;
    ```
 
 5. Devuelve un listado de todos los clientes que realizaron un pedido durante el año `2017`, cuya cantidad esté entre `300` € y `1000` €.
 
    ```sql
    # Johan Diaz
+   SELECT DISTINCT cl.*, p.fecha, p.total
+   FROM cliente AS cl
+   RIGHT JOIN pedido AS p ON cl.id = p.id_cliente
+   WHERE p.fecha LIKE "2017%" AND p.total > 300 AND p.total < 1000;
    ```
 
 6. Devuelve el nombre y los apellidos de todos los comerciales que ha participado en algún pedido realizado por `María Santana Moreno`.
 
    ```sql
    # Santiago Muñoz
+   SELECT DISTINCT co.nombre, CONCAT(co.apellido1, " ", co.apellido2) AS apellidos
+   FROM comercial AS co
+   INNER JOIN pedido AS p ON co.id = p.id_comercial
+   WHERE p.id_cliente = 6;
    ```
 
-   
-
 7. Devuelve el nombre de todos los clientes que han realizado algún pedido con el comercial `Daniel Sáez Vega`.
+
+   ```sql
+   SELECT DISTINCT cl.nombre 
+   FROM cliente AS cl
+   INNER JOIN pedido AS p ON p.id_cliente = cl.id
+   INNER JOIN comercial AS co ON p.id_comercial = co.id
+   WHERE co.id = 1;
+   ```
 
 ### 3. Consultas multitabla (Composición externa)
 
@@ -151,27 +174,67 @@ Resuelva todas las consultas utilizando las cláusulas `LEFT JOIN` y `RIGHT JOIN
 
 1. Devuelve un listado con **todos los clientes** junto con los datos de los pedidos que han realizado. Este listado también debe incluir los clientes que no han realizado ningún pedido. El listado debe estar ordenado alfabéticamente por el primer apellido, segundo apellido y nombre de los clientes.
 
+   ```sql
+   SELECT cl.*, p.*
+   FROM cliente AS cl
+   LEFT JOIN pedido AS p ON p.id_cliente = cl.id
+   ORDER BY 
+   cl.apellido1,
+   cl.apellido2,
+   cl.nombre;
+   ```
+
 2. Devuelve un listado con **todos los comerciales** junto con los datos de los pedidos que han realizado. Este listado también debe incluir los comerciales que no han realizado ningún pedido. El listado debe estar ordenado alfabéticamente por el primer apellido, segundo apellido y nombre de los comerciales.
 
    ```sql
    # Veronica
+   SELECT co.*, p.*
+   FROM comercial AS co
+   LEFT JOIN pedido AS p ON co.id = p.id_comercial
+   ORDER BY
+   co.apellido1,
+   co.apellido2,
+   co.nombre;
    ```
 
 3. Devuelve un listado que solamente muestre los clientes que no han realizado ningún pedido.
+
+   ```sql
+   SELECT cl.*
+   FROM cliente AS cl
+   LEFT JOIN pedido AS p ON cl.id = p.id_cliente
+   WHERE p.id IS NULL;
+   ```
 
 4. Devuelve un listado que solamente muestre los comerciales que no han realizado ningún pedido.
 
    ```sql
    # Camilo Navas
+   SELECT co.*
+   FROM comercial AS co
+   LEFT JOIN pedido AS p ON co.id = p.id_comercial
+   WHERE p.id IS NULL;
    ```
 
 5. Devuelve un listado con los clientes que no han realizado ningún pedido y de los comerciales que no han participado en ningún pedido. Ordene el listado alfabéticamente por los apellidos y el nombre. En en listado deberá diferenciar de algún modo los clientes y los comerciales.
 
    ```sql
-   # German Ramos
+   SELECT cl.nombre, CONCAT(cl.apellido1, " ", cl.apellido2) AS apellido
+   FROM cliente AS cl
+   LEFT JOIN pedido AS p ON cl.id = p.id_cliente
+   WHERE p.id IS NULL
+   
+   UNION 
+   
+   SELECT co.nombre, CONCAT(co.apellido1, " ", co.apellido2)
+   FROM comercial AS co
+   LEFT JOIN pedido AS p ON co.id = p.id_comercial
+   WHERE p.id IS NULL;
    ```
 
    
+
+### 
 
 ### 4. Consultas resumen
 
