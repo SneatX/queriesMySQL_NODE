@@ -242,8 +242,13 @@ Resuelva todas las consultas utilizando las cláusulas `LEFT JOIN` y `RIGHT JOIN
 ### 4. Consultas resumen
 
 1. Calcula la cantidad total que suman todos los pedidos que aparecen en la tabla `pedido`.
-
+   ```sql
+   SELECT SUM(pedido.total) AS total FROM pedido;
+   ```
 2. Calcula la cantidad media de todos los pedidos que aparecen en la tabla `pedido`.
+   ```sql
+   SELECT AVG(pedido.total) AS promedio FROM pedido;
+   ```
 
 3. Calcula el número total de comerciales distintos que aparecen en la tabla `pedido`.
 
@@ -252,41 +257,62 @@ Resuelva todas las consultas utilizando las cláusulas `LEFT JOIN` y `RIGHT JOIN
    ```
 
 4. Calcula el número total de clientes que aparecen en la tabla `cliente`.
+   ```sql
+   SELECT COUNT(*) FROM cliente;
+   ```
 
 5. Calcula cuál es la mayor cantidad que aparece en la tabla `pedido`.
 
    ```sql
    # Juan Rodriguez
+   SELECT MAX(total) FROM pedido;
    ```
 
 6. Calcula cuál es la menor cantidad que aparece en la tabla `pedido`.
 
    ```sql
    # Hendrickson
+   SELECT MIN(total) FROM pedido;
    ```
 
 7. Calcula cuál es el valor máximo de categoría para cada una de las ciudades que aparece en la tabla `cliente`.
 
    ```sql
    # Rivas
+   SELECT DISTINCT (ciudad), MAX(categoria) FROM cliente GROUP BY ciudad;
    ```
 
 8. Calcula cuál es el máximo valor de los pedidos realizados durante el mismo día para cada uno de los clientes. Es decir, el mismo cliente puede haber realizado varios pedidos de diferentes cantidades el mismo día. Se pide que se calcule cuál es el pedido de máximo valor para cada uno de los días en los que un cliente ha realizado un pedido. Muestra el identificador del cliente, nombre, apellidos, la fecha y el valor de la cantidad.
 
    ```SQL
    # WILIAN GALVIS
+   SELECT t1.id, t1.nombre, t1.apellido1, MAX(t2.total),     t2.fecha 
+   
+   FROM cliente t1, pedido t2 
+   
+   WHERE t2.id_cliente = t1.id GROUP BY t2.fecha, t1.id ORDER BY t2.fecha;
    ```
 
 9. Calcula cuál es el máximo valor de los pedidos realizados durante el mismo día para cada uno de los clientes, teniendo en cuenta que sólo queremos mostrar aquellos pedidos que superen la cantidad de 2000 €.
 
    ```sql
    # Wiliam Meza
+   SELECT p.*
+      FROM pedido p
+      INNER JOIN (
+          SELECT id_cliente, fecha, MAX(total) AS max_total
+          FROM pedido
+          WHERE total > 2000
+          GROUP BY id_cliente, fecha
+      ) po ON p.id_cliente = po.id_cliente AND p.fecha = po.fecha AND p.total = po.max_total;
    ```
 
 10. Calcula el máximo valor de los pedidos realizados para cada uno de los comerciales durante la fecha `2016-08-17`. Muestra el identificador del comercial, nombre, apellidos y total.
 
     ```sql
     # Kelly
+        SELECT p.id 'id_pedido'
+    , c.id 'id_comercial', concat(c.nombre ,'  ', c.apellido1) 'Comercial', max(p.total) 'Max Value' From comercial  c INNER JOIN pedido p ON c.id= p.id_comercial WHERE fecha='2016-08-17' GROUP BY p.id , c.nombre , c.apellido1;
     ```
 
 11. Devuelve un listado con el identificador de cliente, nombre y apellidos y el número total de pedidos que ha realizado cada uno de clientes. Tenga en cuenta que pueden existir clientes que no han realizado ningún pedido. Estos clientes también deben aparecer en el listado indicando que el número de pedidos realizados es `0`.
@@ -303,34 +329,63 @@ Resuelva todas las consultas utilizando las cláusulas `LEFT JOIN` y `RIGHT JOIN
 
     ```sql
     # David Julio
+   SELECT cliente.id, cliente.nombre, cliente.apellido1, cliente.apellido2, COUNT(pedido.id) AS cantidad2017 FROM cliente INNER JOIN pedido ON pedido.id_cliente = cliente.id WHERE YEAR(pedido.fecha) = 2017 GROUP BY cliente.id;
     ```
 
 13. Devuelve un listado que muestre el identificador de cliente, nombre, primer apellido y el valor de la máxima cantidad del pedido realizado por cada uno de los clientes. El resultado debe mostrar aquellos clientes que no han realizado ningún pedido indicando que la máxima cantidad de sus pedidos realizados es `0`. Puede hacer uso de la función [`IFNULL`](https://dev.mysql.com/doc/refman/8.0/en/control-flow-functions.html#function_ifnull).
 
     ```sql
     # Andres Alvares
+   SELECT C.id, C.nombre, C.apellido1, IFNULL(max(P.total), 0) AS 'Cantidad maxima'
+   FROM cliente AS C
+   LEFT JOIN pedido as P
+   ON C.id = P.id_cliente
+   GROUP BY C.id;
     ```
 
 14. Devuelve cuál ha sido el pedido de máximo valor que se ha realizado cada año.
-
     ```sql
     # ANDERSON
+        SELECT 
+        pedidos.id,
+        YEAR(pedidos.fecha) AS Año,
+        pedidos.total AS 'Maximo Valor',
+        pedidos.fecha AS 'Fecha Completa',
+        pedidos.id_cliente AS 'ID Cliente',
+        pedidos.id_comercial AS 'ID Comercial'
+        FROM 
+        pedido pedidos JOIN (
+          SELECT
+          YEAR(fecha) AS Año,
+          max(total) AS Valor_Maximo
+          FROM 
+          pedido
+          GROUP BY 
+          año 
+          ORDER BY 
+          año) 
+       AS max_ped_por_año 
+       ON Año = max_ped_por_año.Año 
+       AND pedidos.total = max_ped_por_año.Valor_Maximo;
     ```
-
 15. Devuelve el número total de pedidos que se han realizado cada año.
 
     ```sql
     # Manuel Gil
+   SELECT YEAR(fecha) AS año, COUNT(*) AS numero_pedido FROM pedido GROUP BY YEAR(fecha) ORDER BY año;
     ```
 
 #### 5. Subconsultas con `IN` y `NOT IN`
 
 1. Devuelve un listado de los clientes que no han realizado ningún pedido. (Utilizando `IN` o `NOT IN`).
-
+   ```sql
+   SELECT * FROM cliente LEFT JOIN pedido ON pedido.id_cliente = cliente.id WHERE cliente.id NOT IN (SELECT pedido.id_cliente FROM pedido);
+   ```
 2. Devuelve un listado de los comerciales que no han realizado ningún pedido. (Utilizando `IN` o `NOT IN`).
 
    ```sql
    # Manuel Serrano
+   SELECT * FROM comercial LEFT JOIN pedido ON pedido.id_comercial = comercial.id WHERE comercial.id NOT IN (SELECT pedido.id_comercial FROM pedido);
    ```
 
    
